@@ -1,11 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Contoh1 extends CI_Controller {
+class Contoh3 extends CI_Controller {
 
   public function index()
   {
-    $this->load->view('contoh1');
+    $this->load->view('contoh3');
   }
 
-}
+} 
