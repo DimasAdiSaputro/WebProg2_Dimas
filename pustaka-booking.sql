@@ -151,7 +151,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'pustaka_6251a2ce428081649517262.2724','default.jpg','naveta.cand@gmail.com','Naveta','$2y$10$sG0NSMPsvTsJrecGpDCWFeVP//bxhuMPIw7NTSULJGYqp49.s0I6u',1),(4,'pustaka_6252553e051ee1649562942.021','default.jpg','nvtcand24@gmail.com','Naveta Candra','$2y$10$QwqM4Un1j7g5zImqzmF1JONRooQWkkIlVW1SwEB/YV21Lq0Sa/5tK',2);
+INSERT INTO `user` VALUES (1,'pustaka_6251a2ce428081649517262.2724','default.jpg','dimasadisaputr0699@gmail.com','Dimas Adi Saputro','$2y$10$sG0NSMPsvTsJrecGpDCWFeVP//bxhuMPIw7NTSULJGYqp49.s0I6u',1);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
