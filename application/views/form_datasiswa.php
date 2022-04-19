@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Implementasi Model Prototipe Pada Digital Learning Management System (Di-Lemas)</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
 <body bgcolor="orens">
 <?php echo validation_errors(); ?>
 <form action="<?= base_url('datasiswa/cetak'); ?>"method="post">
+<th colspan="3" align="center"><h2>Implementasi Model Prototipe Pada Digital Learning Management System (Di-Lemas)</h2></th>
 <table width="500" align="center" border="1">
     <tr><th colspan="3">Pengolahan Data siswa</th></tr>
     <tr><td>Nama</td><td><input type="text" name="nama" size="25" maxlength="50" placeholder="Masukan nama">
