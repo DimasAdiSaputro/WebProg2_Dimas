@@ -58,5 +58,9 @@ class User_model extends CI_Model {
             redirect(base_url() . 'auth');
         }
     }
+    public function cekData($where = null)
+    {
+        return $this->db->get_where('user', $where);
+    }
 
 }
