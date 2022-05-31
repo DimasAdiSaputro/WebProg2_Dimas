@@ -19,9 +19,9 @@ class Autentifikasi extends CI_Controller
             $data['judul'] = 'Login';
             $data['user'] = '';
 
-            $this->load->view('templates1/aute_header', $data);
+            $this->load->view('template/aute_header', $data);
             $this->load->view('autentifikasi/login');
-            $this->load->view('templates1/aute_footer');
+            $this->load->view('template/aute_footer');
         } else{
             $this->_login();
         }
@@ -76,4 +76,48 @@ class Autentifikasi extends CI_Controller
         }
     }
 
+    public function registrasi()
+    {
+        $this->form_validation->set_rules('nama', 'Nama', 'required|min_length[3]|max_length[50]|trim');
+        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+        $this->form_validation->set_rules('pass1', 'Password 1', 'required|min_length[3]|max_length[50]');
+        $this->form_validation->set_rules('pass2', 'Password 2', 'required|min_length[3]|max_length[50]|matches[pass1]');
+
+        $this->form_validation->set_message('valid_email', 'Email yang anda masukan tidak valid!');
+        $this->form_validation->set_message('required', 'Kolom ini wajib di-isi!');
+        $this->form_validation->set_message('matches', 'Password tidak sesuai!');
+        $this->form_validation->set_message('min_length', 'Kolom harus di-isi minimal 3 karakter!');
+        $this->form_validation->set_message('max_length', 'Kolom harus di-isi maksimal 50 karakter!');
+
+        if ($this->form_validation->run() == FALSE) {
+            $data['judul'] = 'Register Page';
+            $data['user'] = '';
+
+            $this->load->view('template/aute_header', $data);
+            $this->load->view('autentifikasi/registrasi');
+            $this->load->view('template/aute_footer');
+        } else {
+            $this->load->model('ModelUser');
+            $this->ModelUser->CekData();
+        }
+    }
+
+    public function logout(){
+        $this->session->unset_userdata('email');
+        $this->session->unset_userdata('role_id');
+
+        $this->session->flashdata('pesan', '
+        <div class="allert alert-info alert-messsage" role="alert">anda telah logout</div>');
+        redirect('autentifikasi');
+    }
+
+    public function blok(){
+        $this->load->view('autentifikasi/blok');
+    }
+
+    public function gagal(){
+        $this->load->view('autentifikasi/gagal');
+    }
+
+    
 }

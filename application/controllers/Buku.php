@@ -1,103 +1,247 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Buku extends CI_Controller {
-
+class Buku extends CI_Controller
+{
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('Model_buku');
-        if(!$this->session->userdata('uid')) {
-            $this->session->set_flashdata('msg_error', 'Silakan login terlebih dahulu!');
-            redirect(base_url() . 'auth');
-        }
-        if ($this->session->userdata('uid') && $this->session->userdata('role') != 1 && !in_array($this->router->fetch_method(), array('index', 'cari'))) {
-            $this->session->set_flashdata('msg_error', 'Kamu bukan admin!');
-            redirect(base_url() . 'buku');
-        }
+        cek_login();
     }
 
+    //manajemen Buku
     public function index()
     {
-        $data['list_buku'] = $this->Model_buku->default_show();
-        $data['title'] = 'Buku';
-        $this->load->view('template/header', $data);
-        $this->load->view('buku', $data);
-        $this->load->view('template/footer');
-    }
+        $data['judul'] = 'Data Buku';
+        $data['user'] = $this->ModelUser->cekData(['email' => $this->session->userdata('email')])->row_array();
+        $data['buku'] = $this->ModelBuku->getBuku()->result_array();
+        $data['kategori'] = $this->ModelBuku->getKategori()->result_array();
 
-    public function cari()
-    {
-        if($this->input->post('pencarian')) {
-            $data['list_buku'] = $this->Model_buku->search($this->input->post('pencarian'));
-        }
-        $data['title'] = 'Pencarian Buku';
-        $this->load->view('template/header', $data);
-        $this->load->view('buku_cari', $data);
-        $this->load->view('template/footer');
-    }
-    
-    public function add()
-    {
-        $data['title'] = 'Tambah Buku';
-        $this->form_validation->set_rules('judul_buku', 'Judul', 'required|trim');
-        $this->form_validation->set_rules('pengarang', 'Pengarang', 'required|trim');
-        $this->form_validation->set_rules('penerbit', 'Penerbit', 'required|trim');
-        $this->form_validation->set_rules('tahun_terbit', 'Tahun Terbit', 'required|trim');
-        $this->form_validation->set_rules('isbn', 'ISBN', 'required|trim');
-        $this->form_validation->set_rules('stok', 'Stok', 'required|trim');
-        $this->form_validation->set_rules('id_kategori', 'ID Kategori', 'required|trim');
-        
-        $this->form_validation->set_message('required', 'Kolom ini wajib di-isi!');
-        
-        if ($this->form_validation->run() == FALSE) {
-            $this->load->view('template/header', $data);
-            $this->load->view('buku_tambah');
-            $this->load->view('template/footer');
+        $this->form_validation->set_rules('judul_buku', 'Judul Buku', 'required|min_length[3]', [
+            'required' => 'Judul Buku harus diisi',
+            'min_length' => 'Judul buku terlalu pendek'
+        ]);
+        $this->form_validation->set_rules('id_kategori', 'Kategori', 'required', [
+            'required' => 'Nama pengarang harus diisi',
+        ]);
+        $this->form_validation->set_rules('pengarang', 'Nama Pengarang', 'required|min_length[3]', [
+            'required' => 'Nama pengarang harus diisi',
+            'min_length' => 'Nama pengarang terlalu pendek'
+        ]);
+        $this->form_validation->set_rules('penerbit', 'Nama Penerbit', 'required|min_length[3]', [
+            'required' => 'Nama penerbit harus diisi',
+            'min_length' => 'Nama penerbit terlalu pendek'
+        ]);
+        $this->form_validation->set_rules('tahun', 'Tahun Terbit', 'required|min_length[3]|max_length[4]|numeric', [
+            'required' => 'Tahun terbit harus diisi',
+            'min_length' => 'Tahun terbit terlalu pendek',
+            'max_length' => 'Tahun terbit terlalu panjang',
+            'numeric' => 'Hanya boleh diisi angka'
+        ]);
+        $this->form_validation->set_rules('isbn', 'Nomor ISBN', 'required|min_length[3]|numeric', [
+            'required' => 'Nama ISBN harus diisi',
+            'min_length' => 'Nama ISBN terlalu pendek',
+            'numeric' => 'Yang anda masukan bukan angka'
+        ]);
+        $this->form_validation->set_rules('stok', 'Stok', 'required|numeric', [
+            'required' => 'Stok harus diisi',
+            'numeric' => 'Yang anda masukan bukan angka'
+        ]);
+
+        //konfigurasi sebelum gambar diupload
+        $config['upload_path'] = './assets/img/upload/';
+        $config['allowed_types'] = 'jpg|png|jpeg';
+        $config['max_size'] = '3000';
+        $config['max_width'] = '1024';
+        $config['max_height'] = '1000';
+        $config['file_name'] = 'img' . time();
+
+        $this->load->library('upload', $config);
+
+        if ($this->form_validation->run() == false) {
+            $this->load->view('templates/header', $data);
+            $this->load->view('templates/sidebar', $data);
+            $this->load->view('templates/topbar', $data);
+            $this->load->view('buku/index', $data);
+            $this->load->view('templates/footer');
         } else {
-            if(!$this->session->userdata('role') === 1) {
-                redirect(base_url() . 'user');
+            if ($this->upload->do_upload('image')) {
+                $image = $this->upload->data();
+                $gambar = $image['file_name'];
             } else {
-                $this->Model_buku->add();
+                $gambar = '';
             }
-        }
-        
 
+            $data = [
+                'judul_buku' => $this->input->post('judul_buku', true),
+                'id_kategori' => $this->input->post('id_kategori', true),
+                'pengarang' => $this->input->post('pengarang', true),
+                'penerbit' => $this->input->post('penerbit', true),
+                'tahun_terbit' => $this->input->post('tahun', true),
+                'isbn' => $this->input->post('isbn', true),
+                'stok' => $this->input->post('stok', true),
+                'dipinjam' => 0,
+                'dibooking' => 0,
+                'image' => $gambar
+            ];
+
+            $this->ModelBuku->simpanBuku($data);
+            redirect('buku');
+        }
     }
 
-    public function edit()
+    public function hapusBuku()
     {
-        $data['title'] = 'Edit Buku';
-        if ($this->input->post('book_target_id')) {
-            $data['book'] = $this->Model_buku->get_by_id($this->input->post('book_target_id'));
+        $where = ['id' => $this->uri->segment(3)];
+        $this->ModelBuku->hapusBuku($where);
+        redirect('buku');
+    }
 
-            $this->load->view('template/header', $data);
-            $this->load->view('buku_edit', $data);
-            $this->load->view('template/footer');
-        } else if($this->input->post('book_id')) {
-            $this->Model_buku->edit($this->input->post('book_id'));
+    public function ubahBuku()
+    {
+        $data['judul'] = 'Ubah Data Buku';
+        $data['user'] = $this->ModelUser->cekData(['email' => $this->session->userdata('email')])->row_array();
+        $data['buku'] = $this->ModelBuku->bukuWhere(['id' => $this->uri->segment(3)])->result_array();
+        $kategori = $this->ModelBuku->joinKategoriBuku(['buku.id' => $this->uri->segment(3)])->result_array();
+        foreach ($kategori as $k) {
+            $data['id'] = $k['id_kategori'];
+            $data['k'] = $k['kategori'];
+        }
+        $data['kategori'] = $this->ModelBuku->getKategori()->result_array();
+
+        $this->form_validation->set_rules('judul_buku', 'Judul Buku', 'required|min_length[3]', [
+            'required' => 'Judul Buku harus diisi',
+            'min_length' => 'Judul buku terlalu pendek'
+        ]);
+        $this->form_validation->set_rules('id_kategori', 'Kategori', 'required', [
+            'required' => 'Nama pengarang harus diisi',
+        ]);
+        $this->form_validation->set_rules('pengarang', 'Nama Pengarang', 'required|min_length[3]', [
+            'required' => 'Nama pengarang harus diisi',
+            'min_length' => 'Nama pengarang terlalu pendek'
+        ]);
+        $this->form_validation->set_rules('penerbit', 'Nama Penerbit', 'required|min_length[3]', [
+            'required' => 'Nama penerbit harus diisi',
+            'min_length' => 'Nama penerbit terlalu pendek'
+        ]);
+        $this->form_validation->set_rules('tahun', 'Tahun Terbit', 'required|min_length[3]|max_length[4]|numeric', [
+            'required' => 'Tahun terbit harus diisi',
+            'min_length' => 'Tahun terbit terlalu pendek',
+            'max_length' => 'Tahun terbit terlalu panjang',
+            'numeric' => 'Hanya boleh diisi angka'
+        ]);
+        $this->form_validation->set_rules('isbn', 'Nomor ISBN', 'required|min_length[3]|numeric', [
+            'required' => 'Nama ISBN harus diisi',
+            'min_length' => 'Nama ISBN terlalu pendek',
+            'numeric' => 'Yang anda masukan bukan angka'
+        ]);
+        $this->form_validation->set_rules('stok', 'Stok', 'required|numeric', [
+            'required' => 'Stok harus diisi',
+            'numeric' => 'Yang anda masukan bukan angka'
+        ]);
+
+        //konfigurasi sebelum gambar diupload
+        $config['upload_path'] = './assets/img/upload/';
+        $config['allowed_types'] = 'jpg|png|jpeg';
+        $config['max_size'] = '3000';
+        $config['max_width'] = '1024';
+        $config['max_height'] = '1000';
+        $config['file_name'] = 'img' . time();
+
+        //memuat atau memanggil library upload
+        $this->load->library('upload', $config);
+
+        if ($this->form_validation->run() == false) {
+            $this->load->view('templates/header', $data);
+            $this->load->view('templates/sidebar', $data);
+            $this->load->view('templates/topbar', $data);
+            $this->load->view('buku/ubah_buku', $data);
+            $this->load->view('templates/footer');
         } else {
-            redirect(base_url() . 'user');
+            if ($this->upload->do_upload('image')) {
+                $image = $this->upload->data();
+                unlink('assets/img/upload/' . $this->input->post('old_pict', TRUE));
+                $gambar = $image['file_name'];
+            } else {
+                $gambar = $this->input->post('old_pict', TRUE);
+            }
+
+            $data = [
+                'judul_buku' => $this->input->post('judul_buku', true),
+                'id_kategori' => $this->input->post('id_kategori', true),
+                'pengarang' => $this->input->post('pengarang', true),
+                'penerbit' => $this->input->post('penerbit', true),
+                'tahun_terbit' => $this->input->post('tahun', true),
+                'isbn' => $this->input->post('isbn', true),
+                'stok' => $this->input->post('stok', true),
+                'image' => $gambar
+            ];
+
+            $this->ModelBuku->updateBuku($data, ['id' => $this->input->post('id')]);
+            redirect('buku');
         }
     }
 
-    public function delete()
+    //manajemen kategori
+    public function kategori()
     {
-        $this->Model_buku->delete();
-    }
-    
-    public function pinjam()
-    {
-        $this->Model_buku->booking();
-        $this->session->set_flashdata('msg_success', 'Buku dipinjam!');
-        redirect(base_url() . 'user');
-    }
-    
-    public function kembalikan()
-    {
-        $this->Model_buku->kembalikan();
-        $this->session->set_flashdata('msg_success', 'Buku dikembalikan!');
-        redirect(base_url() . 'user');
+        $data['judul'] = 'Kategori Buku';
+        $data['user'] = $this->ModelUser->cekData(['email' => $this->session->userdata('email')])->row_array();
+        $data['kategori'] = $this->ModelBuku->getKategori()->result_array();
+
+        $this->form_validation->set_rules('kategori', 'Kategori', 'required', [
+            'required' => 'Judul Buku harus diisi'
+        ]);
+
+        if ($this->form_validation->run() == false) {
+            $this->load->view('templates/header', $data);
+            $this->load->view('templates/sidebar', $data);
+            $this->load->view('templates/topbar', $data);
+            $this->load->view('buku/kategori', $data);
+            $this->load->view('templates/footer');
+        } else {
+            $data = [
+                'kategori' => $this->input->post('kategori', TRUE)
+            ];
+
+            $this->ModelBuku->simpanKategori($data);
+            redirect('buku/kategori');
+        }
     }
 
+    public function ubahKategori()
+    {
+        $data['judul'] = 'Ubah Data Kategori';
+        $data['user'] = $this->ModelUser->cekData(['email' => $this->session->userdata('email')])->row_array();
+        $data['kategori'] = $this->ModelBuku->kategoriWhere(['id' => $this->uri->segment(3)])->result_array();
+
+
+        $this->form_validation->set_rules('kategori', 'Nama Kategori', 'required|min_length[3]', [
+            'required' => 'Nama Kategori harus diisi',
+            'min_length' => 'Nama Kategori terlalu pendek'
+        ]);
+
+        if ($this->form_validation->run() == false) {
+            $this->load->view('templates/header', $data);
+            $this->load->view('templates/sidebar', $data);
+            $this->load->view('templates/topbar', $data);
+            $this->load->view('buku/ubah_kategori', $data);
+            $this->load->view('templates/footer');
+        } else {
+
+            $data = [
+                'kategori' => $this->input->post('kategori', true)
+            ];
+
+            $this->ModelBuku->updateKategori(['id' => $this->input->post('id')], $data);
+            redirect('buku/kategori');
+        }
+    }
+
+    public function hapusKategori()
+    {
+        $where = ['id' => $this->uri->segment(3)];
+        $this->ModelBuku->hapusKategori($where);
+        redirect('buku/kategori');
+    }
 }
