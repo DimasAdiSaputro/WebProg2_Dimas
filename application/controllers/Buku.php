@@ -59,11 +59,11 @@ class Buku extends CI_Controller
         $this->load->library('upload', $config);
 
         if ($this->form_validation->run() == false) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebar', $data);
-            $this->load->view('templates/topbar', $data);
+            $this->load->view('template/header', $data);
+            $this->load->view('template/sidebar', $data);
+            $this->load->view('template/topbar', $data);
             $this->load->view('buku/index', $data);
-            $this->load->view('templates/footer');
+            $this->load->view('template/footer');
         } else {
             if ($this->upload->do_upload('image')) {
                 $image = $this->upload->data();
@@ -77,7 +77,7 @@ class Buku extends CI_Controller
                 'id_kategori' => $this->input->post('id_kategori', true),
                 'pengarang' => $this->input->post('pengarang', true),
                 'penerbit' => $this->input->post('penerbit', true),
-                'tahun_terbit' => $this->input->post('tahun', true),
+                'tahun_penerbit' => $this->input->post('tahun', true),
                 'isbn' => $this->input->post('isbn', true),
                 'stok' => $this->input->post('stok', true),
                 'dipinjam' => 0,
@@ -152,11 +152,11 @@ class Buku extends CI_Controller
         $this->load->library('upload', $config);
 
         if ($this->form_validation->run() == false) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebar', $data);
-            $this->load->view('templates/topbar', $data);
+            $this->load->view('template/header', $data);
+            $this->load->view('template/sidebar', $data);
+            $this->load->view('template/topbar', $data);
             $this->load->view('buku/ubah_buku', $data);
-            $this->load->view('templates/footer');
+            $this->load->view('template/footer');
         } else {
             if ($this->upload->do_upload('image')) {
                 $image = $this->upload->data();
@@ -171,7 +171,7 @@ class Buku extends CI_Controller
                 'id_kategori' => $this->input->post('id_kategori', true),
                 'pengarang' => $this->input->post('pengarang', true),
                 'penerbit' => $this->input->post('penerbit', true),
-                'tahun_terbit' => $this->input->post('tahun', true),
+                'tahun_penerbit' => $this->input->post('tahun', true),
                 'isbn' => $this->input->post('isbn', true),
                 'stok' => $this->input->post('stok', true),
                 'image' => $gambar
@@ -194,11 +194,11 @@ class Buku extends CI_Controller
         ]);
 
         if ($this->form_validation->run() == false) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebar', $data);
-            $this->load->view('templates/topbar', $data);
+            $this->load->view('template/header', $data);
+            $this->load->view('template/sidebar', $data);
+            $this->load->view('template/topbar', $data);
             $this->load->view('buku/kategori', $data);
-            $this->load->view('templates/footer');
+            $this->load->view('template/footer');
         } else {
             $data = [
                 'kategori' => $this->input->post('kategori', TRUE)
@@ -222,11 +222,11 @@ class Buku extends CI_Controller
         ]);
 
         if ($this->form_validation->run() == false) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebar', $data);
-            $this->load->view('templates/topbar', $data);
+            $this->load->view('template/header', $data);
+            $this->load->view('template/sidebar', $data);
+            $this->load->view('template/topbar', $data);
             $this->load->view('buku/ubah_kategori', $data);
-            $this->load->view('templates/footer');
+            $this->load->view('template/footer');
         } else {
 
             $data = [

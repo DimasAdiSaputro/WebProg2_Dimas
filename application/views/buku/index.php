@@ -37,7 +37,7 @@
                         <td><?= $b['judul_buku']; ?></td>
                         <td><?= $b['pengarang']; ?></td>
                         <td><?= $b['penerbit']; ?></td>
-                        <td><?= $b['tahun_terbit']; ?></td>
+                        <td><?= $b['tahun_penerbit']; ?></td>
                         <td><?= $b['isbn']; ?></td>
                         <td><?= $b['stok']; ?></td>
                         <td><?= $b['dipinjam']; ?></td>
